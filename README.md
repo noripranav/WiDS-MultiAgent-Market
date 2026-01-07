@@ -1,97 +1,44 @@
-# WiDS Project: Multi-Agent Market Simulation using Mesa
+# WiDS Project: Agent-Based Market Model using Mesa
 
-## Project Overview
-This project aims to simulate a financial market environment populated by multiple autonomous trading agents (Quant Agents). Unlike traditional models, the focus is on **strategic interaction, competition, and game-theoretic behavior** among agents operating in the same market.
+This repository contains a simple simulation of a financial market built using Python and the Mesa framework. The goal of this project is to understand how multiple trader agents interact in a shared market and how their individual actions together affect the market price over time.
 
-Each agent seeks to maximize its own profit by reacting to market conditions and the collective behavior of other agents.
+This implementation serves as a base model that can later be extended with smarter trading strategies based on game theory.
 
----
+## Market Model Overview
+The market consists of a single tradable asset and a fixed number of trader agents. The simulation runs in discrete time steps. In each step, every agent is activated once and allowed to take an action. The combined actions of all agents determine how the market price changes.
 
-## Phase 1: Market Simulation using Mesa
+The market price is dynamic and changes depending on how many agents choose to buy or sell.
 
-### Market Model
-We implemented a basic market using the **Mesa Python framework**, which supports agent-based modeling. The market consists of:
-- A single tradable asset
-- Multiple trader agents
-- Order placement (buy/sell)
-- Price updates based on excess demand
-- Transaction costs
+## Trader Agent (`agent.py`)
+Each trader agent starts with some cash and zero shares. At every time step, the agent randomly chooses one of three actions: buy, sell, or hold.
 
-### Key Components
-- **MarketModel**: Controls the simulation flow and global parameters.
-- **TraderAgent**: Represents individual traders with simple trading rules.
-- **Scheduler**: Activates agents at every timestep.
-- **DataCollector**: Records prices, volumes, and agent profits.
+If the agent buys, its cash decreases and its share count increases. If the agent sells, its cash increases and its share count decreases. If the agent holds, nothing changes. Each buy and sell action is recorded in the market’s order book, which keeps track of total buy and sell orders for that step.
 
-### Files Included
-- `model.py` – Defines the market and model logic
-- `agent.py` – Defines trader agent behavior
-- `run.py` – Runs the simulation
-- `requirements.txt` – Python dependencies
+This random trading behavior is used as a simple baseline to study market dynamics.
 
-### Output
-The simulation produces time-series data for:
-- Asset price evolution
-- Trading volume
-- Individual agent profits
+## Market Model (`model.py`)
+The market model controls all agents and the flow of the simulation. Agents are activated in a random order to avoid any bias. At the start of each step, the order book is reset.
 
-This forms the foundation for integrating advanced strategies in later phases.
+After all agents have acted, the market price is updated using a simple excess demand rule. If buy orders are greater than sell orders, the price increases. If sell orders are greater than buy orders, the price decreases. A minimum price limit is applied so the price does not become zero or negative.
 
----
+The model also collects data such as market price and order counts at every time step.
 
-## Phase 2: Game Theory Strategies (Conceptual)
+## Running the Simulation (`run.py`)
+The simulation is executed using the `run.py` file. It initializes the market with a chosen number of agents and runs the model for a fixed number of steps.
 
-### Strategy 1: Minority Game Strategy
-Inspired by the **Minority Game** and **El Farol Bar Problem**, this strategy rewards agents for being in the minority.
+After the simulation ends, the collected price data is plotted against time. This plot helps visualize how the market price changes due to agent interactions.
 
-**Idea:**
-If most agents are buying, prices become inefficient. An agent gains an advantage by selling instead.
+## Game Theory Strategy: Adaptive Minority Strategy
+This project also studies a game-theory-based trading idea called the Adaptive Minority Strategy. The main idea is that markets often become crowded when many agents take the same action, which reduces profit opportunities.
 
-**Implementation Concept:**
-- Agents track recent market actions
-- Predict majority behavior
-- Choose the opposite action
-- Reinforcement learning can be used to update strategy scores
+In this strategy, an agent observes recent market behavior to see whether buying or selling has been dominant. If buying has been dominant for several steps, the agent expects the trade to be crowded and chooses to sell. If selling has been dominant, the agent chooses to buy.
 
-**Why it works:**
-Crowded trades reduce profitability. Being contrarian helps capture inefficiencies.
+The agent also keeps track of how profitable this behavior is over time. If the strategy performs poorly for some period, the agent can switch to a neutral or random action. This makes the agent adaptive instead of blindly following a fixed rule.
 
----
+This strategy is more advanced than a simple minority rule because it considers recent trends and adapts to changing market conditions, while still remaining easy to understand and implement.
 
-### Strategy 2: Adaptive Strategy Switching
-Agents maintain multiple strategies and dynamically choose the best-performing one.
+## Dependencies
+The project uses Python along with the Mesa framework. Libraries such as NumPy, Pandas, and Matplotlib are used for data handling and visualization. All required dependencies are listed in the `requirements.txt` file.
 
-**Idea:**
-Markets are non-stationary. A strategy that works now may fail later.
-
-**Implementation Concept:**
-- Each agent maintains a pool of strategies
-- Track profit contribution of each strategy
-- Select the highest-performing strategy over time
-
-**Why it works:**
-This mimics real-world quant funds that constantly adapt to regime changes.
-
----
-
-## Tools & Technologies
-- Python
-- Mesa (Agent-Based Modeling)
-- NumPy, Pandas
-- Matplotlib (for visualization)
-
----
-
-## Current Status (Mid-Term Submission)
-- Market simulation implemented using Mesa
-- Basic trader agents operational
-- Initial understanding of game theory models documented
-- Ready to integrate advanced strategies in the next phase
-
----
-
-## References
-- Mesa Documentation: https://mesa.readthedocs.io/en/stable/
-- Investopedia: https://www.investopedia.com/terms/g/gametheory.asp
-- El Farol Bar Problem: Arthur (1994)
-- Minority Game Research Paper
+## Current Status
+The basic market model is fully functional and demonstrates agent-based market behavior. The adaptive minority strategy has been conceptually designed and documented. This setup provides a strong foundation for implementing and testing smarter trading strategies in later stages of the project.
